@@ -100,7 +100,7 @@ def run_metti(
 
     # TI
     print("\nComputing trajectory graphs...")
-    communities = ad.obs["metric_clusters"].to_numpy().astype(np.int)
+    communities = ad.obs["metric_clusters"].to_numpy().astype(np.int32)
     X = ad.obsm["metric_embedding"]
 
     n_neighbors = n_neighbors_ti
@@ -205,7 +205,7 @@ def run_metti_v2(
 
     # TI
     print("\nComputing Connectivity graphs...")
-    communities = ad.obs["metric_clusters"].to_numpy().astype(np.int)
+    communities = ad.obs["metric_clusters"].to_numpy().astype(np.int32)
     X = ad.obsm["metric_embedding"]
 
     n_neighbors = n_neighbors_ti

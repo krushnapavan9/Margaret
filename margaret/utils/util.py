@@ -181,14 +181,14 @@ def determine_cell_clusters(
         # Compute nearest neighbors
         sc.pp.neighbors(data, use_rep=obsm_key, **nn_kwargs)
         sc.tl.louvain(data, key_added=cluster_key, **kwargs)
-        data.obs[cluster_key] = data.obs[cluster_key].to_numpy().astype(np.int)
+        data.obs[cluster_key] = data.obs[cluster_key].to_numpy().astype(np.int32)
         clusters = data.obs[cluster_key]
         score = None
     elif backend == "leiden":
         # Compute nearest neighbors
         sc.pp.neighbors(data, use_rep=obsm_key, **nn_kwargs)
         sc.tl.leiden(data, key_added=cluster_key, **kwargs)
-        data.obs[cluster_key] = data.obs[cluster_key].to_numpy().astype(np.int)
+        data.obs[cluster_key] = data.obs[cluster_key].to_numpy().astype(np.int32)
         clusters = data.obs[cluster_key]
         score = None
     else:

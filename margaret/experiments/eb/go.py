@@ -5,11 +5,8 @@ import pandas as pd
 import re
 import scanpy as sc
 
-from gprofiler import GProfiler
-
-
+from gprofiler import gprofiler
 # Create a GOProfiler object
-gp = GProfiler(return_dataframe=True)
 
 
 def transform_pval(p):
@@ -64,7 +61,7 @@ def generate_go_terms(
 
         # GO query
         print(f"Querying for {len(remaining_genes)} genes")
-        go_df = gp.profile(organism="hsapiens", query=list(remaining_genes), **kwargs)
+        go_df = gprofiler(organism="hsapiens", query=list(remaining_genes), **kwargs)
         if save_dir is not None:
             save_path = os.path.join(save_dir, f"GO_{idx}.csv")
             go_df.to_csv(save_path, index=False)
@@ -126,7 +123,7 @@ def generate_go_heatmap(
         save_df = pd.DataFrame(index=filtered_df.index)
         save_df.loc[:, "lineage/cluster"] = cluster_id
         save_df.loc[:, save_columns] = filtered_df.loc[:, save_columns]
-        big_df = big_df.append(save_df)
+        big_df = pd.concat([big_df,save_df])
 
     print(big_df)
 

@@ -53,7 +53,7 @@ def get_terminal_states(
         nx.betweenness_centrality(g).values(), index=np.unique(communities)
     )
     betweenness = betweenness / betweenness.sum()
-    mad_betweenness = ss.median_absolute_deviation(betweenness.to_numpy())
+    mad_betweenness = ss.median_abs_deviation(betweenness.to_numpy())
     median_betweenness = betweenness.median()
     threshold = (median_betweenness - mad_multiplier * mad_betweenness).to_numpy()
     threshold = threshold if threshold > 0 else 0
@@ -236,6 +236,9 @@ def sample_waypoints(
         wps.extend(w_)
 
         for k, v in d_.items():
+            if k not in dists.columns:
+                col_df = pd.DataFrame(index = dists.index, columns=[k])
+                dists=pd.concat([dists, col_df], axis=1)
             dists.loc[cell_ids, k] = v
 
     # Add the waypoint to the annotated data object
@@ -409,10 +412,10 @@ def _differentiation_entropy(
     ent = branch_probs.apply(entropy, axis=1)
 
     # Add terminal states
-    ent = ent.append(pd.Series(0, index=terminal_states))
+    ent = pd.concat([ent,pd.Series(0, index=terminal_states)])
     bp = pd.DataFrame(0, index=terminal_states, columns=terminal_states)
     bp.values[range(len(terminal_states)), range(len(terminal_states))] = 1
-    branch_probs = branch_probs.append(bp.loc[:, branch_probs.columns])
+    branch_probs = pd.concat([branch_probs, bp.loc[:, branch_probs.columns]])
 
     return ent, branch_probs
 
@@ -476,9 +479,9 @@ def compute_diff_potential(
     # Waypoint to Terminal State connectivity
     print("Waypoint to Terminal State connectivity")
     X = pd.DataFrame(ad.obsm[embed_key], index=ad.obs_names)
-    X_wp = X.loc[wp_, :]
+    X_wp = X.loc[list(wp_), :]
     pt = ad.obs[pt_key]
-    wp_comms = communities.loc[wp_]
+    wp_comms = communities.loc[list(wp_)]
     _, bp = _differentiation_entropy(
         X_wp,
         t_cell_ids,
@@ -492,7 +495,7 @@ def compute_diff_potential(
     )
 
     # Project branch probs on the cells
-    bps_ = S.loc[:, wp_].loc[:, bp.index].dot(bp)
+    bps_ = S.loc[:, list(wp_)].loc[:, list(bp.index)].dot(bp)
     bps_ = bps_.div(bps_.sum(axis=1), axis=0)
 
     # We perform the assignment in this way to account for

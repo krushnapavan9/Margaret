@@ -774,23 +774,32 @@ def plot_lineage_trends(
     gam_kwargs={},
     **kwargs,
 ):
+    if imputed_key is not None:
+        if isinstance(ad.obsm[imputed_key],np.ndarray):
+            ad.X = ad.obsm[imputed_key]
+        elif isinstance(ad.obsm[imputed_key],pd.DataFrame):
+            ad.X = ad.obsm[imputed_key].values
+    ad = ad[:,list(set(genes) & set(ad.var_names))].copy()
     t_states = cell_branch_probs.columns
     pt = ad.obs[pseudotime_key]
 
     data_ = ad.X
-    if imputed_key is not None:
-        data_ = ad.obsm[imputed_key]
+    
 
     if isinstance(data_, scipy.sparse.csr_matrix):
         data_ = data_.todense()
+    
+
+    data_df = pd.DataFrame(data_, columns=ad.var_names, index=ad.obs_names)
+    obs_present = [col for col in ad.obs.columns if col in genes]
+    data_df = pd.concat([data_df, ad.obs[obs_present]], axis=1)
 
     if norm:
         # Min-max normalization
-        data_ = (data_ - np.min(data_, axis=0)) / (
-            np.max(data_, axis=0) - np.min(data_, axis=0)
-        )
-
-    data_df = pd.DataFrame(data_, columns=ad.var_names, index=ad.obs_names)
+        from sklearn.preprocessing import MinMaxScaler
+        scaler = MinMaxScaler()
+        data_df = pd.DataFrame(scaler.fit_transform(data_df.values), index = data_df.index, columns = data_df.columns)
+        
     ncols = math.ceil(len(genes) / nrows)
     fig, ax = plt.subplots(
         nrows=nrows, ncols=ncols, sharex=True, sharey=True, figsize=figsize

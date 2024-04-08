@@ -1,0 +1,9 @@
+conda create -n margaret python==3.12.*
+pip install torch==2.2.2
+pip install scanpy==1.10.0
+pip install jupyterlab==4.1.5
+pip install phenograph==1.5.7
+pip install magic-impute==3.0.0
+pip install phate==1.0.11
+pip install pygam==0.9.1
+pip install gprofiler==1.2.2

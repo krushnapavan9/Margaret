@@ -191,6 +191,12 @@ def determine_cell_clusters(
         data.obs[cluster_key] = data.obs[cluster_key].to_numpy().astype(np.int32)
         clusters = data.obs[cluster_key]
         score = None
+    elif backend in list(data.obs.keys()):
+        sc.pp.neighbors(data, use_rep=obsm_key, **nn_kwargs)
+        data.obs[cluster_key] = data.obs[backend].astype("category").cat.codes.values.copy()
+        print(dict(enumerate(data.obs[backend].astype("category").cat.categories)))
+        clusters = data.obs[backend]
+        score = None
     else:
         raise NotImplementedError(f"The backend {backend} is not supported yet!")
     return clusters, score
